@@ -1,0 +1,405 @@
+{
+  "fee_policy": {
+    "rate": 0.029,
+    "fixed": 0.3004
+  },
+  "l1": {
+    "model_name": "l1",
+    "n_classes": 11,
+    "classes": [
+      "AMBIGUOUS_MATCH",
+      "AMOUNT_MISMATCH",
+      "CURRENCY_MISMATCH",
+      "DUPLICATE_INTERNAL",
+      "DUPLICATE_PROCESSOR",
+      "FEE_MISMATCH",
+      "MATCHED",
+      "MISSING_INTERNAL",
+      "MISSING_PROCESSOR",
+      "PARTIAL_REFUND",
+      "REFUND_MATCHED"
+    ],
+    "train_size": 816,
+    "test_size": 204,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "avg_confidence": 0.9768,
+    "feature_importance": {
+      "has_internal": 0.1388,
+      "has_processor": 0.1388,
+      "is_duplicate_internal": 0.0962,
+      "fee_diff": 0.0953,
+      "candidate_count": 0.0935,
+      "currency_match": 0.0931,
+      "gross_diff": 0.0926,
+      "is_duplicate_processor": 0.0916,
+      "refund_ratio": 0.0856,
+      "has_refund": 0.0597,
+      "time_diff_seconds": 0.0135,
+      "gross_diff_pct": 0.0011,
+      "fee_pct": 0.0001,
+      "fee_amount": 0.0001,
+      "gross_amount_valid": 0.0,
+      "payment_status_encoded": 0.0
+    },
+    "confusion_matrix": [
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        170,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4
+      ]
+    ],
+    "per_class_report": {
+      "AMBIGUOUS_MATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "AMOUNT_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "CURRENCY_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "DUPLICATE_INTERNAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "DUPLICATE_PROCESSOR": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "FEE_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "MATCHED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 170.0
+      },
+      "MISSING_INTERNAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "MISSING_PROCESSOR": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "PARTIAL_REFUND": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "REFUND_MATCHED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 204.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 204.0
+      }
+    }
+  },
+  "l2": {
+    "model_name": "l2",
+    "n_classes": 6,
+    "classes": [
+      "AMOUNT_MISMATCH",
+      "CURRENCY_MISMATCH",
+      "DUPLICATE_BANK_ENTRY",
+      "LATE_SETTLEMENT",
+      "MATCHED",
+      "MISSING_BANK_SETTLEMENT"
+    ],
+    "train_size": 171,
+    "test_size": 43,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "avg_confidence": 0.9553,
+    "feature_importance": {
+      "has_bank_entry": 0.2721,
+      "is_duplicate_bank": 0.2119,
+      "currency_match": 0.203,
+      "settlement_delay_days": 0.1871,
+      "settlement_diff": 0.0789,
+      "expected_net_total": 0.0351,
+      "credited_amount_val": 0.0065,
+      "settlement_diff_pct": 0.0053,
+      "has_processor_batch": 0.0
+    },
+    "confusion_matrix": [
+      [
+        5,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        28,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
+      ]
+    ],
+    "per_class_report": {
+      "AMOUNT_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 5.0
+      },
+      "CURRENCY_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "DUPLICATE_BANK_ENTRY": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "LATE_SETTLEMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "MATCHED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 28.0
+      },
+      "MISSING_BANK_SETTLEMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 43.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 43.0
+      }
+    }
+  }
+}

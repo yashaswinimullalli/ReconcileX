@@ -1,0 +1,102 @@
+{
+  "mixed_internal_ledger": {
+    "rows": 1010,
+    "columns": [
+      "internal_payment_id",
+      "merchant_order_id",
+      "occurred_at",
+      "gross_amount",
+      "currency",
+      "payment_status",
+      "payment_method",
+      "synthetic_customer_reference"
+    ],
+    "dtypes": {
+      "internal_payment_id": "str",
+      "merchant_order_id": "str",
+      "occurred_at": "str",
+      "gross_amount": "float64",
+      "currency": "str",
+      "payment_status": "str",
+      "payment_method": "str",
+      "synthetic_customer_reference": "str"
+    }
+  },
+  "mixed_processor": {
+    "rows": 1075,
+    "columns": [
+      "processor_transaction_id",
+      "merchant_order_id",
+      "processor_event_type",
+      "processor_event_time",
+      "gross_amount",
+      "fee_amount",
+      "net_amount",
+      "currency",
+      "settlement_batch_id",
+      "processor_status"
+    ],
+    "dtypes": {
+      "processor_transaction_id": "str",
+      "merchant_order_id": "str",
+      "processor_event_type": "str",
+      "processor_event_time": "str",
+      "gross_amount": "str",
+      "fee_amount": "float64",
+      "net_amount": "float64",
+      "currency": "str",
+      "settlement_batch_id": "str",
+      "processor_status": "str"
+    }
+  },
+  "mixed_bank_settlements": {
+    "rows": 219,
+    "columns": [
+      "bank_entry_id",
+      "settlement_batch_id",
+      "booked_at",
+      "credited_amount",
+      "currency",
+      "bank_reference",
+      "description"
+    ],
+    "dtypes": {
+      "bank_entry_id": "str",
+      "settlement_batch_id": "str",
+      "booked_at": "str",
+      "credited_amount": "float64",
+      "currency": "str",
+      "bank_reference": "str",
+      "description": "str"
+    }
+  },
+  "mixed_ground_truth": {
+    "rows": 1244,
+    "columns": [
+      "scenario_id",
+      "result_scope",
+      "work_key",
+      "settlement_batch_id",
+      "internal_payment_id",
+      "processor_transaction_id",
+      "bank_entry_id",
+      "expected_outcome",
+      "expected_reason_code",
+      "expected_difference",
+      "explanation"
+    ],
+    "dtypes": {
+      "scenario_id": "str",
+      "result_scope": "str",
+      "work_key": "str",
+      "settlement_batch_id": "str",
+      "internal_payment_id": "str",
+      "processor_transaction_id": "str",
+      "bank_entry_id": "str",
+      "expected_outcome": "str",
+      "expected_reason_code": "str",
+      "expected_difference": "float64",
+      "explanation": "str"
+    }
+  }
+}
