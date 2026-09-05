@@ -132,6 +132,38 @@ export function CSVUploader({ isOpen, onClose, onSuccess }: CSVUploaderProps) {
   const filesReady = internalFile && processorFile && bankFile;
   const fileCount = [internalFile, processorFile, bankFile].filter(Boolean).length;
 
+  // Pre-fill all 3 slots with the mini demo CSV data
+  const loadDemoFiles = () => {
+    const storeCSV =
+      'merchant_order_id,gross_amount,occurred_at\n' +
+      'ORD-1001,1000,2026-09-01 10:00:00\n' +
+      'ORD-1002,2000,2026-09-01 10:15:00\n' +
+      'ORD-1003,1500,2026-09-01 11:00:00\n' +
+      'ORD-1004,3000,2026-09-01 11:30:00\n' +
+      'ORD-1005,2500,2026-09-01 12:00:00\n' +
+      'ORD-1006,1200,2026-09-01 12:30:00\n';
+
+    const paymentCSV =
+      'merchant_order_id,processor_transaction_id,gross_amount,fee_amount,settlement_batch_id,processor_event_time\n' +
+      'ORD-1001,PAY-A101,1000,20,SB-001,2026-09-01 10:00:05\n' +
+      'ORD-1002,PAY-B202,2000,40,SB-001,2026-09-01 10:15:05\n' +
+      'ORD-1003,PAY-C303,1500,30,SB-002,2026-09-01 11:00:05\n' +
+      'ORD-1004,PAY-D404,3000,60,SB-002,2026-09-01 11:30:05\n' +
+      'ORD-1005,PAY-E505,2500,50,SB-003,2026-09-01 12:00:05\n' +
+      'ORD-1006,PAY-F606,1200,24,SB-003,2026-09-01 12:30:05\n';
+
+    const bankCSV =
+      'settlement_batch_id,credited_amount,booked_at\n' +
+      'SB-001,2940,2026-09-02 09:00:00\n' +
+      'SB-002,4390,2026-09-02 09:05:00\n' +
+      'SB-003,1170,2026-09-05 09:00:00\n';
+
+    setInternalFile(new File([storeCSV], 'mini_store_sales_orders.csv', { type: 'text/csv' }));
+    setProcessorFile(new File([paymentCSV], 'mini_payment_app_report.csv', { type: 'text/csv' }));
+    setBankFile(new File([bankCSV], 'mini_bank_statement.csv', { type: 'text/csv' }));
+    setError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!internalFile || !processorFile || !bankFile) {
@@ -185,6 +217,18 @@ export function CSVUploader({ isOpen, onClose, onSuccess }: CSVUploaderProps) {
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
+          )}
+
+          {/* Quick-fill with demo data */}
+          {!filesReady && (
+            <button
+              type="button"
+              onClick={loadDemoFiles}
+              className="w-full py-2.5 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-all flex items-center justify-center gap-2"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Load Demo Data (6 orders, 6 payments, 3 deposits)</span>
+            </button>
           )}
 
           <FileSlot
