@@ -1,13 +1,12 @@
 # ReconcileX — AI Finance Controller
 
-> **Track 04 — AI Finance Controller: "Run the books and the cash position"**  
-> Razorpay AI Buildathon 2026 · Solo Project
+
 
 <div align="center">
   <img width="700" alt="ReconcileX Banner" src="https://github.com/user-attachments/assets/2d19f864-c5f8-441f-81a8-aaef68293051" />
 </div>
 
-ReconcileX is an AI Finance Controller that reconciles financial records across multiple sources (merchant internal ledgers, payment processor transactions, and bank settlement deposits). It identifies matches and discrepancies, predicts root causes using supervised tabular machine learning (XGBoost), explains ambiguous cases with Gemini 2.0 Flash, and enforces deterministic policy rules to escalate cases it cannot safely resolve.
+<img width="1198" height="1313" alt="image" src="https://github.com/user-attachments/assets/c30c8e79-dc27-4ce5-bcfb-2e710d246b16" />
 
 ---
 
