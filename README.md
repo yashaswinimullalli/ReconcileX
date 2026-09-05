@@ -2,7 +2,6 @@
 
 **AI-powered multi-source financial reconciliation.**
 
-Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
 <div align="center">
   <img width="700" alt="ReconcileX Banner" src="https://github.com/user-attachments/assets/2d19f864-c5f8-441f-81a8-aaef68293051" />
