@@ -2,33 +2,124 @@
 
 **AI-powered multi-source financial reconciliation.**
 
+Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
 
 ---
 
 ## What It Does
 
-ReconcileX matches financial records across three sources — **store orders**, **payment gateway reports**, and **bank statements** — to find discrepancies, missing payments, and fee overcharges.
+ReconcileX matches financial records across three sources — **store orders**, **payment gateway reports**, and **bank statements** — to detect discrepancies, missing settlements, and fee leakage with high speed and audit-grade precision.
 
-**Pipeline:**
 ```
-Store Orders → Payment Gateway → Bank Deposits
-     ↕               ↕               ↕
-  Deterministic Rules → XGBoost ML → Gemini AI → Policy Engine
+Store Orders ──▶ Payment Gateway ──▶ Bank Deposits
+     │                  │                 │
+     ▼                  ▼                 ▼
+Deterministic Rules ──▶ XGBoost ML ──▶ Gemini 2.0 AI ──▶ Policy Engine
 ```
 
 ---
 
-## Key Numbers
+## Key Metrics
 
-| Metric | Value |
-|--------|-------|
-| Benchmark dataset | 1,244 records, 3 sources |
-| Processing time | ~510 ms |
-| Throughput | ~2,439 records/sec |
-| ML test accuracy | 100% (held-out set) |
-| Auto-resolve rate | 84.89% |
-| AI invocation rate | ~2.5% (only ambiguous cases) |
+| Metric | Benchmark Performance |
+|--------|----------------------|
+| **Dataset Size** | 1,244 multi-source transactions (ReconRiver) |
+| **Pipeline Speed** | ~510 ms total batch execution |
+| **Throughput** | ~2,439 records / second |
+| **ML Accuracy** | 100% classification on held-out test split |
+| **Auto-Resolve Rate** | 84.89% resolved with zero manual intervention |
+| **AI Invocation Rate** | ~2.5% selective routing (only ambiguous exceptions) |
+
+---
+
+## AI Architecture
+
+<div align="center">
+  <img width="800" alt="ReconcileX AI Architecture" src="./docs/ai_architecture.jpg" />
+</div>
+
+### Multi-Stage Pipeline Overview
+
+| Stage | Module | Responsibility |
+|:---:|---|---|
+| **1** | `ingestion.py` | Validates schemas, parses CSVs, and normalizes column headers across sources |
+| **2** | `normalization.py` | Cleans currencies, standardizes timestamps, and canonicalizes amounts |
+| **3** | `matching.py` | Performs L1 (Order ↔ Gateway) & L2 (Settlement ↔ Bank Deposit) join logic |
+| **4** | `discrepancy.py` | Computes gross, fee, and deposit variances; tags anomaly indicators |
+| **5** | `ml_classifier.py` | Dual XGBoost models classify discrepancies into fine-grained root cause classes |
+| **6** | `ai_investigator.py` | Selective Gemini 2.0 Flash agent investigates edge cases & drafts audit narratives |
+| **7** | `policy_engine.py` | Enforces zero-fabrication policies and delivers final resolution verdicts |
+| **8** | `database.py` | Persists reconciled batches, ledger trails, and audit logs into SQLite |
+
+### ML Layer — Dual XGBoost Models
+
+- **L1 Model (Order ↔ Gateway):** 15 discrete classes (e.g. `MATCHED`, `FEE_MISMATCH`, `AMOUNT_MISMATCH`, `MISSING_INTERNAL`, `MISSING_PROCESSOR`, `DUPLICATE_INTERNAL`, `CURRENCY_MISMATCH`, `PARTIAL_REFUND`, etc.)
+- **L2 Model (Settlement ↔ Bank):** 6 classes (e.g. `MATCHED`, `AMOUNT_MISMATCH`, `LATE_SETTLEMENT`, `MISSING_BANK_SETTLEMENT`, `DUPLICATE_BANK_ENTRY`, etc.)
+- **Features:** Amount variances, fee delta, timing differences, string similarity scores, status flags.
+
+### AI Layer & Policy Engine
+
+- **Selective Routing:** Gemini 2.0 Flash is triggered only when ML confidence is marginal (<0.70) or variance exceeds standard policy thresholds (~2.5% of records).
+- **Structured Audit Evidence:** Outputs JSON with root-cause diagnosis, confidence score, itemized evidence chain, and plain-English controller commentary.
+- **Zero-Force Policy:** The policy engine never fabricates a match. High confidence matches are auto-resolved; ambiguous anomalies are surfaced for human review.
+
+---
+
+## File Structure
+
+```
+ReconcileX/
+├── backend/
+│   ├── api/                    # REST route endpoints
+│   │   ├── batches.py          # Batch upload, status & run execution
+│   │   ├── export.py           # CSV & JSON audit export
+│   │   └── records.py          # Detailed transaction lookup & ledger trails
+│   ├── data/                   # Test datasets & benchmark files
+│   │   ├── mini/               # 6-order rapid demo CSVs
+│   │   └── reconriver/         # Full 1,244-record benchmark suite
+│   ├── ml/                     # Machine learning models & training
+│   │   ├── features.py         # Tabular feature engineering
+│   │   ├── train.py            # XGBoost training pipeline
+│   │   ├── l1_model.joblib     # Pretrained L1 model
+│   │   └── l2_model.joblib     # Pretrained L2 model
+│   ├── models/                 # Schemas & ORM models
+│   │   ├── database.py         # SQLite connection & database operations
+│   │   └── schemas.py          # Pydantic models for validation
+│   ├── services/               # Core reconciliation pipeline
+│   │   ├── ai_investigator.py  # Gemini 2.0 Flash AI agent
+│   │   ├── discrepancy.py      # Delta & mismatch calculations
+│   │   ├── ingestion.py        # CSV parsing & column mapping
+│   │   ├── matching.py         # Multi-tier deterministic matcher
+│   │   ├── ml_classifier.py    # XGBoost inference service
+│   │   ├── normalization.py    # Data cleaning & standardization
+│   │   ├── policy_engine.py    # Resolution decision engine
+│   │   └── reconciliation.py   # Master pipeline coordinator
+│   ├── config.py               # Environment configuration
+│   ├── main.py                 # FastAPI application entrypoint
+│   └── requirements.txt        # Backend dependencies
+├── docs/                       # Documentation assets
+│   └── ai_architecture.jpg     # Architecture diagram
+├── frontend/
+│   ├── app/                    # Next.js App Router
+│   │   ├── audit/              # Audit reports & export view
+│   │   ├── dashboard/          # Financial health & overview
+│   │   ├── evaluation/         # Benchmark & accuracy evaluation
+│   │   ├── exceptions/         # Exception triage & [id] deep dive
+│   │   ├── reconciliation/     # Orders and payouts matching tables
+│   │   ├── settings/           # Policy & configuration settings
+│   │   ├── globals.css         # Styling & design system
+│   │   └── page.tsx            # Cinematic intro page
+│   ├── components/             # Reusable UI component library
+│   │   ├── layout/             # Header, Sidebar, Navigation
+│   │   ├── providers/          # Query, Theme & Client providers
+│   │   ├── ui/                 # Buttons, Badges, Modals, Cards
+│   │   └── upload/             # CSV Uploader with built-in demo data
+│   ├── lib/                    # API client, TypeScript types, utilities
+│   ├── package.json            # Frontend dependencies
+│   └── tailwind.config.ts      # Tailwind styling configuration
+└── README.md                   # Project documentation
+```
 
 ---
 
@@ -36,42 +127,37 @@ Store Orders → Payment Gateway → Bank Deposits
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 16, React, TypeScript, Tailwind CSS |
-| Backend | FastAPI, Python, SQLite |
-| ML | XGBoost (15-class L1 + 6-class L2) |
-| AI | Gemini 2.0 Flash (selective investigation) |
-| Fonts | Instrument Serif, Inter |
+| **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
+| **Backend** | FastAPI, Python 3.10+, SQLite, Pydantic |
+| **ML Engine** | XGBoost (Dual L1 & L2 Classifiers), Scikit-learn, Joblib |
+| **AI Agent** | Google Gemini 2.0 Flash via Google GenAI SDK |
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.10+
-- Node.js 18+
-- Gemini API key ([Get one here](https://aistudio.google.com/apikey))
-
-### 1. Backend
+### 1. Backend Setup
 
 ```bash
 cd backend
+python -m venv venv
+# On Windows: .\venv\Scripts\activate
+# On macOS/Linux: source venv/bin/activate
+
 pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Add your GEMINI_API_KEY to .env
+# Set your GEMINI_API_KEY in .env
 
-# Train ML models (pre-trained models included)
-python -m ml.train
-
-# Start server
-python -m uvicorn main:app --host 127.0.0.1 --port 8000
+# Run server (Pretrained models included)
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-API: `http://127.0.0.1:8000` · Docs: `http://127.0.0.1:8000/docs`
+- API Server: `http://127.0.0.1:8000`
+- Interactive Swagger Docs: `http://127.0.0.1:8000/docs`
 
-### 2. Frontend
+### 2. Frontend Setup
 
 ```bash
 cd frontend
@@ -79,151 +165,20 @@ npm install
 npm run dev
 ```
 
-App: `http://localhost:3000`
+- Web App: `http://localhost:3000`
 
 ---
 
-## Project Structure
+## Demo & Testing
 
-```
-ReconcileX/
-├── backend/
-│   ├── api/            # FastAPI route handlers
-│   ├── data/           # Benchmark + mini test datasets
-│   ├── ml/             # XGBoost training & inference
-│   ├── models/         # Database & Pydantic schemas
-│   ├── services/       # Reconciliation pipeline, matching, AI
-│   ├── main.py         # App entrypoint
-│   └── config.py       # Environment & settings
-├── frontend/
-│   ├── app/            # Next.js pages & routing
-│   ├── components/     # UI components
-│   └── lib/            # API client, types, utilities
-└── README.md
-```
+ReconcileX includes a pre-packaged **6-transaction mini dataset** ready for instantaneous testing:
 
----
-
-## AI Architecture
-
-### End-to-End Pipeline
-
-```
- CSV Upload
-     │
-     ▼
-┌──────────┐    ┌──────────────┐    ┌──────────────┐
-│ Ingestion│───▶│Normalization │───▶│   Matching   │
-│          │    │              │    │  (L1 + L2)   │
-└──────────┘    └──────────────┘    └──────┬───────┘
-                                          │
-                                          ▼
-                                   ┌──────────────┐
-                                   │ Discrepancy  │
-                                   │  Detection   │
-                                   └──────┬───────┘
-                                          │
-                              ┌───────────┼───────────┐
-                              ▼           ▼           ▼
-                        ┌──────────┐ ┌──────────┐ ┌──────────┐
-                        │ XGBoost  │ │ Gemini   │ │ Policy   │
-                        │ ML       │ │ AI       │ │ Engine   │
-                        │ Classify │ │ Invest.  │ │ Decide   │
-                        └──────────┘ └──────────┘ └──────────┘
-                              │           │           │
-                              └───────────┼───────────┘
-                                          ▼
-                                   ┌──────────────┐
-                                   │  Database    │
-                                   │  Persist     │
-                                   └──────────────┘
-```
-
-### Pipeline Stages
-
-| # | Stage | Service | What It Does |
-|---|-------|---------|-------------|
-| 1 | **Ingestion** | `ingestion.py` | Parses 3 CSV sources, validates schemas, detects column mappings |
-| 2 | **Normalization** | `normalization.py` | Standardizes amounts, timestamps, IDs, and currency across all sources |
-| 3 | **Matching** | `matching.py` | L1: Order ↔ Payment matching by `merchant_order_id`. L2: Settlement batch ↔ Bank deposit matching by `settlement_batch_id` |
-| 4 | **Discrepancy** | `discrepancy.py` | Computes gross diff, fee diff, settlement diff; flags missing records and amount mismatches |
-| 5 | **ML Classification** | `ml_classifier.py` | XGBoost predicts root cause class with confidence score |
-| 6 | **AI Investigation** | `ai_investigator.py` | Gemini 2.0 Flash analyzes ambiguous cases with structured JSON output |
-| 7 | **Policy Engine** | `policy_engine.py` | Deterministic rules produce final verdict: `AUTO_RESOLVE`, `NEEDS_REVIEW`, or `EXCEPTION` |
-| 8 | **Persistence** | `database.py` | Stores records, audit trail, and batch metrics in SQLite |
-
-### ML Layer — XGBoost
-
-Two independent classifiers trained on the ReconRiver benchmark:
-
-**L1 (Order ↔ Payment) — 15 classes:**
-```
-MATCHED · FEE_MISMATCH · AMOUNT_MISMATCH · MISSING_INTERNAL
-MISSING_PROCESSOR · DUPLICATE_INTERNAL · DUPLICATE_PROCESSOR
-CURRENCY_MISMATCH · PARTIAL_REFUND · REFUND_MATCHED · AMBIGUOUS_MATCH
-```
-
-**L2 (Settlement ↔ Bank) — 6 classes:**
-```
-MATCHED · AMOUNT_MISMATCH · CURRENCY_MISMATCH
-DUPLICATE_BANK_ENTRY · LATE_SETTLEMENT · MISSING_BANK_SETTLEMENT
-```
-
-**Features engineered:** Gross amount diff, fee amount diff, time delta, string similarity scores, missing-field flags, currency match indicators.
-
-### AI Layer — Gemini 2.0 Flash
-
-Gemini is invoked **selectively** — only when:
-- ML confidence is below threshold
-- ML predicts an ambiguous class
-- Unexplained amount exceeds policy limit
-- Data quality flags are raised
-
-**Input:** Structured financial context (order, payment, bank data + ML prediction)  
-**Output:** JSON with `decision`, `root_cause`, `confidence`, `evidence[]`, `plain_english_explanation`  
-**Fallback:** If API fails or times out, the record is safely escalated to `NEEDS_REVIEW`
-
-### Policy Engine — Zero-Force Resolution
-
-The policy engine is the final gatekeeper. It **never fabricates a match**.
-
-```
-ML says MATCHED + high confidence  →  AUTO_RESOLVE
-ML says MATCHED + low confidence   →  AI investigates → Policy decides
-ML says EXCEPTION class            →  EXCEPTION (always)
-AI says MATCH + strong evidence    →  AUTO_RESOLVE
-AI says uncertain                  →  NEEDS_REVIEW (human escalation)
-```
-
-**Core rule:** *"Resolve what the evidence supports. Escalate what it does not."*
-
----
-
-## Screens
-
-| Route | Page | Purpose |
-|-------|------|---------|
-| `/` | Intro | Cinematic entrance |
-| `/dashboard` | Cash Overview | Sales telemetry and money flow summary |
-| `/reconciliation` | Orders & Payouts | Order-level and settlement-level matching |
-| `/exceptions` | Money Issues | Exception triage and investigation |
-| `/exceptions/[id]` | Deep Dive | 3-source ledger trail with AI explanation |
-| `/audit` | Reports | CSV/JSON export for accountants |
-
----
-
-## Demo Data
-
-The app includes a built-in **6-order mini dataset** that loads automatically on first visit. You can also upload your own CSVs through the dashboard.
-
-**Required CSV formats:**
-
-1. **Store Sales** — `merchant_order_id, gross_amount, occurred_at`
-2. **Payment Report** — `merchant_order_id, processor_transaction_id, gross_amount, fee_amount, settlement_batch_id, processor_event_time`
-3. **Bank Statement** — `settlement_batch_id, credited_amount, booked_at`
+1. Click **"Load Demo Data"** directly within the upload modal on the dashboard.
+2. The 3 required streams (*Store Orders*, *Payment Gateway Report*, *Bank Statement*) are automatically staged.
+3. Click **"Upload & Reconcile"** to witness sub-second multi-stage matching, XGBoost categorization, and automated resolution.
 
 ---
 
 ## License
 
-MIT
+MIT License. Built for Razorpay AI Buildathon 2026.
