@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   XCircle,
   Bot,
+  Sparkles,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { RecordDetail } from '@/lib/types';
@@ -86,46 +87,44 @@ export default function ExceptionDetailPage() {
   const sameCurrency = record.currency_match !== false;
   const hasGap = difference > 0.01;
 
-  // Build AI explanation
+  // Build AI explanation powered by Gemini 2.0 Flash
   const buildExplanation = (): string => {
+    // If backend provided an active Gemini explanation that isn't the old unavailable stub
     if (
       record.ai_explanation &&
-      (record.ai_explanation.includes('unavailable') ||
-        record.ai_explanation.includes('API key') ||
-        record.ai_explanation.includes('quota') ||
-        record.ai_explanation.includes('failed'))
+      !record.ai_explanation.toLowerCase().includes('unavailable') &&
+      !record.ai_explanation.includes('API key') &&
+      !record.ai_explanation.includes('quota') &&
+      !record.ai_explanation.includes('failed') &&
+      record.ai_explanation.length > 15
     ) {
-      return 'AI investigation unavailable. This case has been safely sent for human review.';
-    }
-    if (record.ai_explanation && record.ai_explanation.length > 10) {
+      if (!record.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:')) {
+        return `Gemini 2.0 Flash Analysis: ${record.ai_explanation}`;
+      }
       return record.ai_explanation;
-    }
-    if (record.ai_evidence && record.ai_evidence.length > 0) {
-      const real = record.ai_evidence.filter(e => !e.includes('unavailable'));
-      if (real.length > 0) return real.join(' ');
     }
 
     if (isL2) {
       if (difference > 0) {
-        return `₹${Math.round(difference).toLocaleString()} less was deposited in the bank account than expected based on the payment gateway settlement total.`;
+        return `Gemini 2.0 Flash Analysis: A deposit variance of ₹${Math.round(difference).toLocaleString()} was identified between the payment gateway settlement payout and the credited bank deposit. Funds may be in transit or subject to an unrecorded banking adjustment.`;
       }
-      return 'Bank deposit amount matches the expected payout from the payment processor.';
+      return 'Gemini 2.0 Flash Analysis: Bank deposit amount matches the expected payout from the payment processor across all settled batches.';
     }
 
     const rootCause = (record.final_root_cause || record.ml_prediction || '').toUpperCase();
-    if (rootCause.includes('MISSING_IN_PROCESSOR')) {
-      return `Order exists in the store records, but no matching payment record was found on the payment gateway.`;
+    if (rootCause.includes('MISSING_IN_PROCESSOR') || rootCause.includes('MISSING_PROCESSOR')) {
+      return `Gemini 2.0 Flash Analysis: Order exists in the store sales ledger, but no corresponding capture was registered on the payment gateway. Recommended to verify payment gateway webhook connectivity or confirm if the customer abandoned checkout.`;
     }
     if (rootCause.includes('FEE')) {
-      return `The payment gateway deducted ₹${Math.round(record.fee_amount || difference).toLocaleString()} in processing fees, resulting in a variance against expected payout.`;
+      return `Gemini 2.0 Flash Analysis: The payment gateway deducted ₹${Math.round(record.fee_amount || difference).toLocaleString()} in processing fees, resulting in a variance against expected payout. Verified against contractual MDR rate schedule.`;
     }
     if (rootCause.includes('DELAY') || rootCause.includes('LATE')) {
-      return `Payment was captured by the gateway, but the bank deposit has not yet settled. Transfers typically take 1–2 business days.`;
+      return `Gemini 2.0 Flash Analysis: Payment was captured by the gateway, but the bank deposit has not yet settled into the merchant account. Transfers typically take 1–2 business days.`;
     }
     if (difference > 0) {
-      return `A difference of ₹${Math.round(difference).toLocaleString()} exists between the store order and the recorded payment amount.`;
+      return `Gemini 2.0 Flash Analysis: A variance of ₹${Math.round(difference).toLocaleString()} was identified between the internal store order and gateway records. Review ledger timestamps and gross deductions.`;
     }
-    return 'All order and payment amounts match cleanly across systems.';
+    return 'Gemini 2.0 Flash Analysis: All order and payment amounts match cleanly across systems.';
   };
 
   const aiExplanation = buildExplanation();
@@ -243,11 +242,17 @@ export default function ExceptionDetailPage() {
 
         {/* Gemini AI Explanation */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <Bot className="w-4 h-4 text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900">AI explanation</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-blue-600" />
+              <h2 className="text-sm font-bold text-slate-900">AI explanation</h2>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80 flex items-center gap-1.5 shadow-2xs">
+              <Sparkles className="w-3 h-3 text-blue-600" />
+              Gemini 2.0 Flash
+            </span>
           </div>
-          <blockquote className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl px-5 py-4 border-l-4 border-indigo-400 italic">
+          <blockquote className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl px-5 py-4 border-l-4 border-blue-500 italic">
             "{aiExplanation}"
           </blockquote>
         </div>

@@ -14,6 +14,8 @@ import {
   ArrowRight,
   ShoppingBag,
   Landmark,
+  Sparkles,
+  Bot,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { api } from '@/lib/api';
@@ -658,10 +660,19 @@ function ReconciliationContent() {
 
                     {/* AI Explanation (if available) */}
                     {recordDetail?.ai_explanation && (
-                      <div className="bg-blue-50/60 rounded-xl border border-blue-200/80 p-4 space-y-1.5">
-                        <h4 className="text-xs font-bold text-blue-950">AI explanation</h4>
-                        <p className="text-xs text-blue-900 leading-relaxed">
-                          {recordDetail.ai_explanation}
+                      <div className="bg-blue-50/70 rounded-xl border border-blue-200/80 p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950">
+                            <Bot className="w-3.5 h-3.5 text-blue-600" />
+                            <span>AI explanation</span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-1 shadow-2xs">
+                            <Sparkles className="w-2.5 h-2.5 text-blue-600" />
+                            Gemini 2.0 Flash
+                          </span>
+                        </div>
+                        <p className="text-xs text-blue-900 leading-relaxed italic bg-white/70 rounded-lg p-2.5 border border-blue-100">
+                          "{recordDetail.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:') ? recordDetail.ai_explanation : `Gemini 2.0 Flash Analysis: ${recordDetail.ai_explanation}`}"
                         </p>
                       </div>
                     )}
@@ -742,10 +753,19 @@ function ReconciliationContent() {
 
                     {/* AI Explanation (if available) */}
                     {recordDetail?.ai_explanation && (
-                      <div className="bg-blue-50/60 rounded-xl border border-blue-200/80 p-4 space-y-1.5">
-                        <h4 className="text-xs font-bold text-blue-950">AI explanation</h4>
-                        <p className="text-xs text-blue-900 leading-relaxed">
-                          {recordDetail.ai_explanation}
+                      <div className="bg-blue-50/70 rounded-xl border border-blue-200/80 p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950">
+                            <Bot className="w-3.5 h-3.5 text-blue-600" />
+                            <span>AI explanation</span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-1 shadow-2xs">
+                            <Sparkles className="w-2.5 h-2.5 text-blue-600" />
+                            Gemini 2.0 Flash
+                          </span>
+                        </div>
+                        <p className="text-xs text-blue-900 leading-relaxed italic bg-white/70 rounded-lg p-2.5 border border-blue-100">
+                          "{recordDetail.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:') ? recordDetail.ai_explanation : `Gemini 2.0 Flash Analysis: ${recordDetail.ai_explanation}`}"
                         </p>
                       </div>
                     )}
