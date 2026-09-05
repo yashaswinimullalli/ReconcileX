@@ -3,13 +3,8 @@
 **AI-powered multi-source financial reconciliation.**
 
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
-[![Video Demo](https://img.shields.io/badge/Video%20Demo-Google%20Drive-4285F4?style=for-the-badge&logo=google-drive&logoColor=white)](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
-[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-black?style=for-the-badge&logo=next.js&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
-
 🚀 **Live Demo:** [demo](https://reconcile-production-f3bb.up.railway.app)  
-📹 **Video Demo Walkthrough:** [Watch on Google Drive](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
+📹 **Video Demo Walkthrough:** [demo vedio](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
 
 ---
 
