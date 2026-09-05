@@ -96,7 +96,9 @@ export default function ExceptionDetailPage() {
       !record.ai_explanation.includes('API key') &&
       !record.ai_explanation.includes('quota') &&
       !record.ai_explanation.includes('failed') &&
-      record.ai_explanation.length > 15
+      !record.ai_explanation.startsWith('Settlement batch ID:') &&
+      !record.ai_explanation.startsWith('Store sales order') &&
+      record.ai_explanation.length > 45
     ) {
       if (!record.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:')) {
         return `Gemini 2.0 Flash Analysis: ${record.ai_explanation}`;

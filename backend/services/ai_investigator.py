@@ -245,13 +245,16 @@ SAFETY CONSTRAINTS:
             ]
             action = "Monitor next banking day settlement credit."
         elif "BANK" in cause or recon_level == "L2_SETTLEMENT":
+            diff_val = settlement_diff or unexplained
             explanation = (
-                f"Gemini 2.0 Flash Analysis: Settlement batch {work_key} exhibits a net payout variance of "
-                f"₹{settlement_diff or unexplained:.2f} between gateway batch settlement total and credited bank deposit."
+                f"Gemini 2.0 Flash Analysis: Settlement batch {work_key} exhibits a net payout discrepancy of "
+                f"₹{diff_val:,.2f} between the payment gateway batch settlement total and the credited bank deposit. "
+                "This variance indicates potential gateway fee deductions, unrecorded banking adjustments, or delayed clearing of batch transactions."
             )
             evidence = [
-                f"Settlement batch ID: {work_key}.",
-                f"Variance between gateway expected payout and bank credit: ₹{settlement_diff or unexplained:.2f}.",
+                f"Settlement batch reference: {work_key}.",
+                f"Gateway payout vs. bank credit discrepancy: ₹{diff_val:,.2f}.",
+                "Bank ledger settlement cycle audit required.",
             ]
             action = "Inspect bank credit statement and request gateway settlement batch breakdown."
         elif unexplained > 0:

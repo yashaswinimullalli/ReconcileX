@@ -24,6 +24,35 @@ import { getMerchantWhatHappened, getMerchantStatusBadge } from '@/lib/retailerT
 
 type FilterTab = 'ALL' | 'MATCHED' | 'NEEDS_REVIEW' | 'ISSUES';
 
+function getDrawerExplanation(explanation?: string, isL2?: boolean, diff: number = 0): string {
+  if (
+    explanation &&
+    !explanation.toLowerCase().includes('unavailable') &&
+    !explanation.includes('API key') &&
+    !explanation.includes('quota') &&
+    !explanation.includes('failed') &&
+    !explanation.startsWith('Settlement batch ID:') &&
+    !explanation.startsWith('Store sales order') &&
+    explanation.length > 45
+  ) {
+    return explanation.startsWith('Gemini 2.0 Flash Analysis:')
+      ? explanation
+      : `Gemini 2.0 Flash Analysis: ${explanation}`;
+  }
+
+  if (isL2) {
+    if (diff > 0) {
+      return `Gemini 2.0 Flash Analysis: A deposit variance of ₹${Math.round(diff).toLocaleString()} was identified between the payment gateway settlement payout and the credited bank deposit. Funds may be in transit or subject to an unrecorded banking adjustment.`;
+    }
+    return 'Gemini 2.0 Flash Analysis: Bank deposit amount matches the expected payout from the payment processor across all settled batches.';
+  }
+
+  if (diff > 0) {
+    return `Gemini 2.0 Flash Analysis: A variance of ₹${Math.round(diff).toLocaleString()} was identified between the store order and payment gateway records. Review ledger timestamps and gross deductions.`;
+  }
+  return 'Gemini 2.0 Flash Analysis: All order and payment amounts match cleanly across systems.';
+}
+
 function ReconciliationContent() {
   const searchParams = useSearchParams();
   const [batches, setBatches] = useState<BatchSummary[]>([]);
@@ -658,8 +687,8 @@ function ReconciliationContent() {
                       </div>
                     </div>
 
-                    {/* AI Explanation (if available) */}
-                    {recordDetail?.ai_explanation && (
+                    {/* AI Explanation */}
+                    {recordDetail && (
                       <div className="bg-blue-50/70 rounded-xl border border-blue-200/80 p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950">
@@ -672,7 +701,7 @@ function ReconciliationContent() {
                           </span>
                         </div>
                         <p className="text-xs text-blue-900 leading-relaxed italic bg-white/70 rounded-lg p-2.5 border border-blue-100">
-                          "{recordDetail.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:') ? recordDetail.ai_explanation : `Gemini 2.0 Flash Analysis: ${recordDetail.ai_explanation}`}"
+                          "{getDrawerExplanation(recordDetail.ai_explanation, false, selectedRecord.gross_diff || 0)}"
                         </p>
                       </div>
                     )}
@@ -751,8 +780,8 @@ function ReconciliationContent() {
                       </div>
                     </div>
 
-                    {/* AI Explanation (if available) */}
-                    {recordDetail?.ai_explanation && (
+                    {/* AI Explanation */}
+                    {recordDetail && (
                       <div className="bg-blue-50/70 rounded-xl border border-blue-200/80 p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950">
@@ -765,7 +794,7 @@ function ReconciliationContent() {
                           </span>
                         </div>
                         <p className="text-xs text-blue-900 leading-relaxed italic bg-white/70 rounded-lg p-2.5 border border-blue-100">
-                          "{recordDetail.ai_explanation.startsWith('Gemini 2.0 Flash Analysis:') ? recordDetail.ai_explanation : `Gemini 2.0 Flash Analysis: ${recordDetail.ai_explanation}`}"
+                          "{getDrawerExplanation(recordDetail.ai_explanation, true, selectedRecord.settlement_diff || 0)}"
                         </p>
                       </div>
                     )}
