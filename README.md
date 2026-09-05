@@ -4,7 +4,7 @@
 
 
 🚀 **Live Demo:** [demo](https://reconcile-production-f3bb.up.railway.app)  
-📹 **Video Demo Walkthrough:** [demo vedio](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
+📹 **Video Demo Walkthrough:** [demo vedio](https://drive.google.com/file/d/1M0mHIm0XfRHXq9AgD6gQpQ_likno67Nd/view?usp=sharing)
 
 ---
 
@@ -160,23 +160,9 @@ npm run dev
 
 - Web App: `http://localhost:3000`
 
----
 
-## Demo & Testing
 
-ReconcileX is live and accessible at **[cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)**. It includes a pre-packaged **6-transaction mini dataset** ready for instantaneous testing:
 
-1. Click **"Load Demo Data"** directly within the upload modal on the dashboard (or click **"Run Live Verification"**).
-2. The 3 required streams (*Store Orders*, *Payment Gateway Report*, *Bank Statement*) are automatically staged.
-3. Click **"Upload & Reconcile"** to witness sub-second multi-stage matching, XGBoost categorization, Gemini 2.0 Flash AI explanations, and automated resolution.
-
----
-
-## 📹 Video Demo
-
-A complete end-to-end video walkthrough of ReconcileX in action is available here:
-
-🎥 **[Watch the ReconcileX Video Demo on Google Drive](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)**
 
 **What the video covers:**
 - **Zero-State Dashboard:** Clean initialization ready for live uploads or instant verification.
