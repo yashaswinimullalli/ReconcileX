@@ -9,7 +9,7 @@ Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-black?style=for-the-badge&logo=next.js&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
 
-🚀 **Live Demo:** [https://cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)  
+🚀 **Live Demo:** [demo]()  
 📹 **Video Demo Walkthrough:** [Watch on Google Drive](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
 
 ---
