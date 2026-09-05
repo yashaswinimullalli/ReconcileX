@@ -17,14 +17,6 @@
 
 ReconcileX matches financial records across three sources — **store orders**, **payment gateway reports**, and **bank statements** — to detect discrepancies, missing settlements, and fee leakage with high speed and audit-grade precision.
 
-```
-Store Orders ──▶ Payment Gateway ──▶ Bank Deposits
-     │                  │                 │
-     ▼                  ▼                 ▼
-Deterministic Rules ──▶ XGBoost ML ──▶ Gemini 2.0 AI ──▶ Policy Engine
-```
-
----
 
 ## Key Metrics
 
