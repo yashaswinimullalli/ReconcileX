@@ -108,27 +108,98 @@ ReconcileX/
 
 ---
 
-## Architecture
+## AI Architecture
+
+### End-to-End Pipeline
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    RECONCILIATION PIPELINE           │
-├─────────────┬─────────────┬─────────────┬───────────┤
-│  Layer 1    │  Layer 2    │  Layer 3    │  Layer 4  │
-│  Rules      │  XGBoost    │  Gemini AI  │  Policy   │
-│             │             │             │  Engine   │
-│  Exact      │  15-class   │  Selective  │  Zero-    │
-│  matching   │  classifi-  │  investi-   │  force    │
-│  & waterfall│  cation     │  gation     │  resolve  │
-└─────────────┴─────────────┴─────────────┴───────────┘
+ CSV Upload
+     │
+     ▼
+┌──────────┐    ┌──────────────┐    ┌──────────────┐
+│ Ingestion│───▶│Normalization │───▶│   Matching   │
+│          │    │              │    │  (L1 + L2)   │
+└──────────┘    └──────────────┘    └──────┬───────┘
+                                          │
+                                          ▼
+                                   ┌──────────────┐
+                                   │ Discrepancy  │
+                                   │  Detection   │
+                                   └──────┬───────┘
+                                          │
+                              ┌───────────┼───────────┐
+                              ▼           ▼           ▼
+                        ┌──────────┐ ┌──────────┐ ┌──────────┐
+                        │ XGBoost  │ │ Gemini   │ │ Policy   │
+                        │ ML       │ │ AI       │ │ Engine   │
+                        │ Classify │ │ Invest.  │ │ Decide   │
+                        └──────────┘ └──────────┘ └──────────┘
+                              │           │           │
+                              └───────────┼───────────┘
+                                          ▼
+                                   ┌──────────────┐
+                                   │  Database    │
+                                   │  Persist     │
+                                   └──────────────┘
 ```
 
-**Design principle:** *Resolve what the evidence supports. Escalate what it does not.*
+### Pipeline Stages
 
-- **Rules** handle exact matches and deterministic discrepancies
-- **XGBoost** classifies remaining records across 15 exception types
-- **Gemini AI** investigates only ambiguous cases (~2.5% of records)
-- **Policy Engine** enforces zero-force resolution — never fabricates a match
+| # | Stage | Service | What It Does |
+|---|-------|---------|-------------|
+| 1 | **Ingestion** | `ingestion.py` | Parses 3 CSV sources, validates schemas, detects column mappings |
+| 2 | **Normalization** | `normalization.py` | Standardizes amounts, timestamps, IDs, and currency across all sources |
+| 3 | **Matching** | `matching.py` | L1: Order ↔ Payment matching by `merchant_order_id`. L2: Settlement batch ↔ Bank deposit matching by `settlement_batch_id` |
+| 4 | **Discrepancy** | `discrepancy.py` | Computes gross diff, fee diff, settlement diff; flags missing records and amount mismatches |
+| 5 | **ML Classification** | `ml_classifier.py` | XGBoost predicts root cause class with confidence score |
+| 6 | **AI Investigation** | `ai_investigator.py` | Gemini 2.0 Flash analyzes ambiguous cases with structured JSON output |
+| 7 | **Policy Engine** | `policy_engine.py` | Deterministic rules produce final verdict: `AUTO_RESOLVE`, `NEEDS_REVIEW`, or `EXCEPTION` |
+| 8 | **Persistence** | `database.py` | Stores records, audit trail, and batch metrics in SQLite |
+
+### ML Layer — XGBoost
+
+Two independent classifiers trained on the ReconRiver benchmark:
+
+**L1 (Order ↔ Payment) — 15 classes:**
+```
+MATCHED · FEE_MISMATCH · AMOUNT_MISMATCH · MISSING_INTERNAL
+MISSING_PROCESSOR · DUPLICATE_INTERNAL · DUPLICATE_PROCESSOR
+CURRENCY_MISMATCH · PARTIAL_REFUND · REFUND_MATCHED · AMBIGUOUS_MATCH
+```
+
+**L2 (Settlement ↔ Bank) — 6 classes:**
+```
+MATCHED · AMOUNT_MISMATCH · CURRENCY_MISMATCH
+DUPLICATE_BANK_ENTRY · LATE_SETTLEMENT · MISSING_BANK_SETTLEMENT
+```
+
+**Features engineered:** Gross amount diff, fee amount diff, time delta, string similarity scores, missing-field flags, currency match indicators.
+
+### AI Layer — Gemini 2.0 Flash
+
+Gemini is invoked **selectively** — only when:
+- ML confidence is below threshold
+- ML predicts an ambiguous class
+- Unexplained amount exceeds policy limit
+- Data quality flags are raised
+
+**Input:** Structured financial context (order, payment, bank data + ML prediction)  
+**Output:** JSON with `decision`, `root_cause`, `confidence`, `evidence[]`, `plain_english_explanation`  
+**Fallback:** If API fails or times out, the record is safely escalated to `NEEDS_REVIEW`
+
+### Policy Engine — Zero-Force Resolution
+
+The policy engine is the final gatekeeper. It **never fabricates a match**.
+
+```
+ML says MATCHED + high confidence  →  AUTO_RESOLVE
+ML says MATCHED + low confidence   →  AI investigates → Policy decides
+ML says EXCEPTION class            →  EXCEPTION (always)
+AI says MATCH + strong evidence    →  AUTO_RESOLVE
+AI says uncertain                  →  NEEDS_REVIEW (human escalation)
+```
+
+**Core rule:** *"Resolve what the evidence supports. Escalate what it does not."*
 
 ---
 
