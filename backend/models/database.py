@@ -57,6 +57,16 @@ async def insert_batch(batch: dict[str, Any]):
         await db.commit()
 
 
+async def clear_all_data():
+    """Clear all batches, records, and audit logs."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM audit_log")
+        await db.execute("DELETE FROM recon_records")
+        await db.execute("DELETE FROM batches")
+        await db.commit()
+    logger.info("Cleared all reconciliation data from database")
+
+
 async def update_batch(batch_id: str, updates: dict[str, Any]):
     """Update fields on a reconciliation batch."""
     async with aiosqlite.connect(DB_PATH) as db:
@@ -126,8 +136,11 @@ async def get_recon_records(
             where_clauses.append("recon_level = ?")
             params.append(recon_level)
         if final_status:
-            where_clauses.append("final_status = ?")
-            params.append(final_status)
+            if final_status in ("UNRESOLVED", "EXCEPTIONS"):
+                where_clauses.append("final_status != 'AUTO_RESOLVE'")
+            else:
+                where_clauses.append("final_status = ?")
+                params.append(final_status)
 
         where_str = " AND ".join(where_clauses)
 

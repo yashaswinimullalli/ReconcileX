@@ -33,6 +33,7 @@ class AIInvestigationResult:
     confidence: float
     evidence: list[str] = field(default_factory=list)
     recommended_action: str = ""
+    plain_english_explanation: str = ""
     raw_response: Optional[dict[str, Any]] = None
     fallback_used: bool = False
 
@@ -96,26 +97,32 @@ class AIInvestigator:
             raw_text = response.text
             parsed = json.loads(raw_text)
 
-            # Validate required fields
-            decision = str(parsed.get("decision", "NEEDS_REVIEW")).upper()
-            if decision not in {"MATCH", "EXCEPTION", "DUPLICATE_CANDIDATE", "NEEDS_REVIEW"}:
-                decision = "NEEDS_REVIEW"
-
-            root_cause = str(parsed.get("root_cause", ml_prediction))
+            # Validate required fields from Gemini structured JSON
+            issue_type = str(parsed.get("issue_type") or parsed.get("root_cause") or ml_prediction)
+            summary = str(parsed.get("summary") or parsed.get("plain_english_explanation") or f"Discrepancy identified: {issue_type}")
             confidence = float(parsed.get("confidence", 0.70))
             confidence = max(0.0, min(1.0, confidence))
-            evidence = parsed.get("evidence", [])
-            if not isinstance(evidence, list):
-                evidence = [str(evidence)]
+            
+            raw_evidence = parsed.get("evidence", [])
+            evidence = [str(item) for item in raw_evidence] if isinstance(raw_evidence, list) else [str(raw_evidence)]
+            if not evidence:
+                evidence = ["Evidence analyzed by Gemini AI Investigator."]
 
-            recommended_action = str(parsed.get("recommended_action", "Review discrepancy evidence."))
+            recommended_action = str(parsed.get("recommended_action", "Review discrepancy records."))
+            needs_human_review = bool(parsed.get("needs_human_review", True))
+
+            # Map to deterministic policy decision
+            decision = str(parsed.get("decision", "NEEDS_REVIEW")).upper()
+            if decision not in {"MATCH", "EXCEPTION", "DUPLICATE_CANDIDATE", "NEEDS_REVIEW"}:
+                decision = "NEEDS_REVIEW" if needs_human_review else "MATCH"
 
             return AIInvestigationResult(
                 decision=decision,
-                root_cause=root_cause,
+                root_cause=issue_type,
                 confidence=round(confidence, 4),
                 evidence=evidence,
                 recommended_action=recommended_action,
+                plain_english_explanation=summary,
                 raw_response=parsed,
                 fallback_used=False,
             )
@@ -123,7 +130,7 @@ class AIInvestigator:
         except Exception as e:
             logger.warning(f"AI investigation failed for {work_key}: {e}. Returning safe fallback.")
             return self._create_fallback(
-                reason=f"AI call failed ({str(e)[:100]})",
+                reason="AI call timed out or returned invalid response",
                 ml_prediction=ml_prediction,
             )
 
@@ -137,11 +144,9 @@ class AIInvestigator:
         ml_confidence: float,
     ) -> str:
         """Construct a structured prompt for the financial investigator."""
-        return f"""You are ReconcileX, an AI Finance Controller specialized in multi-source financial reconciliation.
+        return f"""You are ReconcileX AI Investigator, an AI Finance Controller specialized in multi-source financial reconciliation for merchants.
 
-Analyze the financial discrepancy for this {recon_level} record and determine the resolution.
-
-RECORD IDENTIFIER: {work_key}
+Analyze the financial discrepancy for this {recon_level} record ({work_key}).
 
 SOURCE RECORD CONTEXT:
 {json.dumps(record_context, indent=2, default=str)}
@@ -156,39 +161,41 @@ ML MODEL PREDICTION:
 TASK:
 1. Reconcile the financial evidence (amounts, fees, refunds, settlement timing).
 2. Check if the difference is explainable (e.g. processor fee, partial refund, rounding, or delay).
-3. Determine whether this case should be resolved or escalated.
+3. Provide an audit-ready, plain English explanation for a merchant.
 
 OUTPUT FORMAT:
 Respond ONLY with valid JSON matching this exact structure:
 {{
-  "decision": "MATCH | EXCEPTION | DUPLICATE_CANDIDATE | NEEDS_REVIEW",
-  "root_cause": "<brief specific root cause>",
+  "issue_type": "<concise description of the issue>",
   "confidence": <float between 0.0 and 1.0>,
+  "summary": "<simple 1-2 sentence explanation written for a merchant without accounting jargon>",
   "evidence": [
     "<factual evidence point 1>",
     "<factual evidence point 2>"
   ],
-  "recommended_action": "<actionable next step for the finance operations team>"
+  "recommended_action": "<actionable next step for the merchant or finance operations>",
+  "needs_human_review": true
 }}
 
-IMPORTANT SAFETY CONSTRAINTS:
+SAFETY CONSTRAINTS:
 - NEVER fabricate numbers or invent evidence.
-- If there is an unexplained monetary variance, choose NEEDS_REVIEW.
-- If currencies differ, choose EXCEPTION.
-- Be concise, professional, and audit-ready.
+- Do NOT approve refunds or modify records.
+- Be concise, objective, and truthful.
 """
 
     def _create_fallback(self, reason: str, ml_prediction: str) -> AIInvestigationResult:
-        """Safe deterministic fallback when AI fails or is not available."""
+        """Safe deterministic fallback when AI fails or is unavailable."""
+        decision = "MATCH" if ml_prediction == "MATCHED" else "NEEDS_REVIEW"
         return AIInvestigationResult(
-            decision="NEEDS_REVIEW",
-            root_cause=ml_prediction if ml_prediction != "MATCHED" else "AMBIGUOUS_MATCH",
+            decision=decision,
+            root_cause=ml_prediction,
             confidence=0.0,
             evidence=[
-                f"Automated AI investigation unavailable: {reason}.",
-                "Deterministic reconciliation evidence and ML predictions preserved.",
+                "AI investigation unavailable. This case has been safely sent for human review.",
+                "Deterministic reconciliation evidence and records preserved.",
             ],
             recommended_action="Conduct manual inspection of ledger records and bank credit entries.",
+            plain_english_explanation="AI investigation unavailable. This case has been safely sent for human review.",
             raw_response={"fallback_reason": reason},
             fallback_used=True,
         )

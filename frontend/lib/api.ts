@@ -35,6 +35,7 @@ async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T>
 export const api = {
   // Batches
   getBatches: () => fetchJSON<BatchSummary[]>('/batches'),
+  listBatches: () => fetchJSON<BatchSummary[]>('/batches'),
 
   getBatchSummary: (batchId: string) =>
     fetchJSON<BatchSummary>(`/batches/${batchId}/summary`),
@@ -45,6 +46,16 @@ export const api = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || 'Failed to trigger demo batch');
+    }
+    return res.json();
+  },
+
+  clearAllBatches: async () => {
+    const url = `${API_BASE}/batches/clear`;
+    const res = await fetch(url, { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to clear reconciliation batches');
     }
     return res.json();
   },

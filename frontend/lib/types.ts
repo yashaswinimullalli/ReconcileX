@@ -88,7 +88,7 @@ export interface AuditTrailEntry {
   id: string;
   step: string;
   action: string;
-  details?: Record<string, any> | string;
+  details?: Record<string, unknown> | string;
   created_at: string;
 }
 
@@ -115,7 +115,7 @@ export interface RecordDetail {
   is_duplicate: boolean;
   ml_prediction?: string;
   ml_confidence?: number;
-  ml_feature_vector?: Record<string, any>;
+  ml_feature_vector?: Record<string, unknown>;
   ai_investigated: boolean;
   ai_decision?: string;
   ai_root_cause?: string;

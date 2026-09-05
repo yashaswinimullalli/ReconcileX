@@ -59,6 +59,15 @@ async def get_all_batches():
     return result
 
 
+@router.post("/clear")
+@router.delete("/clear")
+async def clear_all_batches():
+    """Clear all batches and records for a completely clean slate."""
+    from models.database import clear_all_data
+    await clear_all_data()
+    return {"message": "All reconciliation data cleared successfully", "status": "CLEAN"}
+
+
 @router.post("", response_model=BatchCreateResponse)
 async def create_and_run_batch(
     internal_ledger: UploadFile = File(...),
@@ -117,22 +126,41 @@ async def create_and_run_batch(
 @router.post("/demo", response_model=BatchCreateResponse)
 async def create_demo_batch():
     """
-    One-click demo initialization using the built-in ReconRiver mixed-exceptions dataset.
-    Processes all 1,244 records through the live reconciliation engine.
+    One-click reconciliation run. Uses the 6-order mini dataset if present,
+    or falls back to the built-in ReconRiver benchmark dataset.
     """
-    internal_path = DATA_DIR / "internal_ledger.csv"
-    processor_path = DATA_DIR / "processor_transactions.csv"
-    bank_path = DATA_DIR / "bank_settlements.csv"
-    gt_path = DATA_DIR / "ground_truth.csv"
+    mini_internal = DATA_DIR / "mini_store_sales_orders.csv"
+    mini_processor = DATA_DIR / "mini_payment_app_report.csv"
+    mini_bank = DATA_DIR / "mini_bank_statement.csv"
+
+    if mini_internal.exists() and mini_processor.exists() and mini_bank.exists():
+        internal_path = mini_internal
+        processor_path = mini_processor
+        bank_path = mini_bank
+        gt_path = DATA_DIR / "ground_truth.csv"
+        batch_name = "6-Order Test Batch"
+        total_int_count = 6
+        total_proc_count = 6
+        total_bnk_count = 3
+        msg = "6-order test batch processed successfully."
+    else:
+        internal_path = DATA_DIR / "internal_ledger.csv"
+        processor_path = DATA_DIR / "processor_transactions.csv"
+        bank_path = DATA_DIR / "bank_settlements.csv"
+        gt_path = DATA_DIR / "ground_truth.csv"
+        batch_name = "ReconRiver Mixed-Exceptions Benchmark (1,244 records)"
+        total_int_count = 1010
+        total_proc_count = 1075
+        total_bnk_count = 219
+        msg = "Benchmark dataset processed successfully."
 
     if not (internal_path.exists() and processor_path.exists() and bank_path.exists()):
         raise HTTPException(
             status_code=404,
-            detail="Bundled ReconRiver dataset files not found on server.",
+            detail="Bundled reconciliation dataset files not found on server.",
         )
 
     batch_id = str(uuid.uuid4())
-    batch_name = "ReconRiver Mixed-Exceptions Benchmark (1,244 records)"
     now_iso = datetime.now(timezone.utc).isoformat()
 
     internal_bytes = internal_path.read_bytes()
@@ -161,10 +189,10 @@ async def create_demo_batch():
             batch_id=batch_id,
             status="COMPLETED",
             name=batch_name,
-            total_internal=1010,
-            total_processor=1075,
-            total_bank=219,
-            message="Benchmark dataset processed successfully.",
+            total_internal=total_int_count,
+            total_processor=total_proc_count,
+            total_bank=total_bnk_count,
+            message=msg,
         )
     except Exception as e:
         logger.error(f"Error executing demo batch: {e}", exc_info=True)

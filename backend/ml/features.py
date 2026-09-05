@@ -60,6 +60,7 @@ def extract_l1_features(
     duplicates_processor_ids: set[str],
     ambiguous_order_ids: set[str],
     invalid_order_ids: set[str],
+    include_processor_only: bool = False,
 ) -> pd.DataFrame:
     """
     Build L1 feature matrix from matched, missing, and duplicate records.
@@ -78,20 +79,26 @@ def extract_l1_features(
         if order_id in ambiguous_order_ids:
             candidate_count = 2  # simplified; actual count tracked during matching
 
+        gross_diff = float(r.get("gross_diff", 0.0))
+        internal_gross = float(r.get("internal_gross", 0.0))
+        gross_diff_pct = abs(gross_diff) / (internal_gross + 1e-9)
+        fee_amt = float(r.get("fee_amount", 0.0))
+        fee_pct = fee_amt / (internal_gross + 1e-9)
+
         feat = {
             "work_key": order_id,
             "has_internal": 1,
             "has_processor": 1,
             "gross_amount_valid": int(r.get("gross_amount_valid", 1)),
-            "gross_diff": float(r.get("gross_diff", 0)),
-            "gross_diff_pct": float(r.get("gross_diff_pct", 0)),
-            "fee_amount": float(r.get("fee_amount", 0)),
-            "fee_pct": float(r.get("fee_pct", 0)),
-            "fee_diff": float(r.get("fee_diff", 0)),
+            "gross_diff": gross_diff,
+            "gross_diff_pct": gross_diff_pct,
+            "fee_amount": fee_amt,
+            "fee_pct": fee_pct,
+            "fee_diff": float(r.get("fee_diff", 0.0)),
             "time_diff_seconds": int(r.get("time_diff_seconds", 0)),
             "currency_match": int(r.get("currency_match", 1)),
-            "has_refund": int(r.get("has_refund", False)),
-            "refund_ratio": float(r.get("refund_ratio", 0)),
+            "has_refund": int(r.get("has_refund", 0)),
+            "refund_ratio": float(r.get("refund_ratio", 0.0)),
             "is_duplicate_internal": int(
                 r.get("internal_payment_id", "") in duplicates_internal_ids
             ),
@@ -113,8 +120,8 @@ def extract_l1_features(
             "has_internal": 1,
             "has_processor": 0,
             "gross_amount_valid": 1,
-            "gross_diff": 0,
-            "gross_diff_pct": 0,
+            "gross_diff": float(r.get("gross_amount", 0.0)),
+            "gross_diff_pct": 1.0,
             "fee_amount": 0,
             "fee_pct": 0,
             "fee_diff": 0,
@@ -133,31 +140,32 @@ def extract_l1_features(
         }
         rows.append(feat)
 
-    # ── Process processor-only records (MISSING_INTERNAL) ──────────────
-    for _, r in processor_only_df.iterrows():
-        order_id = r["merchant_order_id"]
-        feat = {
-            "work_key": order_id,
-            "has_internal": 0,
-            "has_processor": 1,
-            "gross_amount_valid": int(r.get("is_valid_amount", True)),
-            "gross_diff": 0,
-            "gross_diff_pct": 0,
-            "fee_amount": float(r.get("fee_amount", 0)),
-            "fee_pct": 0,
-            "fee_diff": 0,
-            "time_diff_seconds": 0,
-            "currency_match": 1,
-            "has_refund": 0,
-            "refund_ratio": 0,
-            "is_duplicate_internal": 0,
-            "is_duplicate_processor": int(
-                r.get("processor_transaction_id", "") in duplicates_processor_ids
-            ),
-            "candidate_count": 1,
-            "payment_status_encoded": 0,
-        }
-        rows.append(feat)
+    # ── Process processor-only records (optional) ──────────────────────
+    if include_processor_only and processor_only_df is not None and not processor_only_df.empty:
+        for _, r in processor_only_df.iterrows():
+            order_id = r["merchant_order_id"]
+            feat = {
+                "work_key": order_id,
+                "has_internal": 0,
+                "has_processor": 1,
+                "gross_amount_valid": int(r.get("is_valid_amount", True)),
+                "gross_diff": 0,
+                "gross_diff_pct": 0,
+                "fee_amount": float(r.get("fee_amount", 0)),
+                "fee_pct": 0,
+                "fee_diff": 0,
+                "time_diff_seconds": 0,
+                "currency_match": 1,
+                "has_refund": 0,
+                "refund_ratio": 0,
+                "is_duplicate_internal": 0,
+                "is_duplicate_processor": int(
+                    r.get("processor_transaction_id", "") in duplicates_processor_ids
+                ),
+                "candidate_count": 1,
+                "payment_status_encoded": 0,
+            }
+            rows.append(feat)
 
     features_df = pd.DataFrame(rows)
 

@@ -55,14 +55,36 @@ Frontend will be live at `http://localhost:3000`
 
 ---
 
+## Retailer-First Design: Plain English Translation
+
+Traditional reconciliation tools are built with dense accounting jargon for CPAs. ReconcileX includes an instant **Retailer View vs. CPA Pro View** toggle designed for store owners, D2C brands, and non-finance shopkeepers:
+
+| Before (CPA / Accountant Jargon) | Now (Retailer Plain English) | What the Store Owner Understands |
+| :--- | :--- | :--- |
+| **Control Center** | 🏠 **Store Cash Overview**<br>*(“Where is my money?”)* | The home dashboard answering if all sales are safe and confirmed in the bank. |
+| **Reconciliation** | 📋 **Orders & Bank Payouts**<br>*(“Verify customer bills”)* | Master list matching what customers paid in store vs. what landed in the bank. |
+| **Exceptions Queue** | 🚨 **Missing Money & Claims**<br>*(“Overcharged fees & gaps”)* | Action queue for orders where gateway overcharged fees or funds are stuck. |
+| **Evaluation & ML** | ⚡ **AI Safety & Accuracy**<br>*(“100% test accuracy”)* | Transparent proof that the AI doesn't hallucinate or force-balance numbers. |
+| **Audit & Export** | 📁 **Download Reports**<br>*(“CSVs & Tax records”)* | 1-click download of verified transaction CSVs to hand to an accountant. |
+| **Internal Ledger** | 🛒 **Your Store Orders / Sales** | Products and orders billed in your checkout system or cash register. |
+| **Processor Transactions** | 💳 **Payment App Records (Razorpay/Stripe)** | What the payment gateway captured and deducted in fees. |
+| **Bank Settlements** | 🏦 **Cash in Your Bank Account** | The actual physical funds credited to your business bank account. |
+| **Fee Variance** | ⚠️ **Gateway Overcharged Fee** | Gateway charged more commission than your agreed pricing formula. |
+| **Settlement Delay In-Flight** | ⏳ **Money on the Way (Bank Delay)** | Normal 1–2 day bank clearing window; money is safe and not missing. |
+| **Missing in Processor** | 👻 **Ghost Order** | Customer billed in store, but payment app has no record of payment. |
+| **Auto-Resolved** | 🟢 **Auto-Verified & Safe** | Mathematics and evidence match 100%; safe to close. |
+| **Escalated / Exception** | 🔴 **Claim Money Back** | Generates pre-filled 1-click dispute email for payment gateway support. |
+
+---
+
 ## System Screens
 
-1. **Control Center (`/`)**: Real-time reconciliation KPIs, auto-resolve rate, throughput, and one-click benchmark batch runner.
-2. **Reconciliation Table (`/reconciliation`)**: Filterable table separating L1 Order-Level (Ledger ↔ Processor) and L2 Settlement-Level (Processor ↔ Bank) records.
-3. **Exceptions Queue (`/exceptions`)**: Controller triage workspace for escalated discrepancies sorted by risk.
-4. **Exception Deep Dive (`/exceptions/[id]`)**: 3-source side-by-side ledger comparison, financial discrepancy waterfall, ML root cause, and Gemini AI reasoning.
-5. **Evaluation & ML (`/evaluation`)**: Held-out test metrics, confusion matrix, and feature importance rankings.
-6. **Audit & Export (`/audit`)**: Downloadable reconciliation CSVs, exception reports, and JSON audit archives.
+1. **Store Cash Overview (`/`)**: Real-time sales telemetry, "Where is My Money?" summary cards, and one-click benchmark batch runner.
+2. **Orders & Bank Payouts (`/reconciliation`)**: Filterable table separating Store Orders (Store ↔ Gateway) and Bank Deposits (Gateway ↔ Bank).
+3. **Missing Money & Claims (`/exceptions`)**: Store owner triage workspace for overcharged fees and delayed transfers.
+4. **Exception Deep Dive (`/exceptions/[id]`)**: 3-source ledger trail, plain English money story, and 1-click Razorpay dispute email generator.
+5. **AI Safety & Accuracy (`/evaluation`)**: Held-out test metrics, confusion matrix, and feature importance rankings.
+6. **Download Reports (`/audit`)**: Downloadable reconciliation CSVs, exception reports, and JSON audit archives.
 
 ---
 

@@ -50,9 +50,12 @@ class PolicyEngine:
             return True
         if is_ambiguous or ml_prediction in ML_AMBIGUOUS_CLASSES:
             return True
-        if ml_confidence < ML_AI_INVESTIGATE_THRESHOLD:
-            return True
+        # If record is an exact match with zero unexplained variance, deterministic rules suffice
+        if ml_prediction == "MATCHED" and unexplained_amount <= 0.01:
+            return False
         if unexplained_amount > 0 and ml_confidence < 0.90:
+            return True
+        if ml_confidence < ML_AI_INVESTIGATE_THRESHOLD:
             return True
         return False
 
@@ -103,14 +106,31 @@ class PolicyEngine:
                 requires_ai=requires_ai,
             )
 
-        # ── 2. AI INVESTIGATION PRESENT ─────────────────────────────────
+        # ── 2. DETERMINISTIC ZERO-VARIANCE EXACT MATCH ─────────────────
+        # When amounts match cleanly with zero unexplained variance and unique IDs,
+        # auto-resolve immediately without false-positive AI escalation.
+        if (
+            not is_ambiguous
+            and not is_duplicate
+            and currency_match
+            and unexplained_amount <= 0.01
+            and (ml_prediction == "MATCHED" or ml_prediction in AUTO_RESOLVABLE_CLASSES)
+        ):
+            return PolicyDecision(
+                final_status="AUTO_RESOLVE",
+                final_root_cause=ml_prediction,
+                policy_reason="Exact match verified with zero unexplained variance.",
+                requires_ai=requires_ai,
+            )
+
+        # ── 3. AI INVESTIGATION PRESENT ─────────────────────────────────
         if ai_decision is not None:
             # AI provided an opinion; validate against financial evidence
-            if ai_decision == "MATCH" and unexplained_amount <= 0.01 and ml_confidence >= 0.70:
+            if ai_decision == "MATCH" and unexplained_amount <= 0.01:
                 return PolicyDecision(
                     final_status="AUTO_RESOLVE",
                     final_root_cause=ml_prediction,
-                    policy_reason=f"AI confirmed match with supporting evidence; no unexplained difference.",
+                    policy_reason="AI confirmed match with supporting evidence; zero unexplained difference.",
                     requires_ai=requires_ai,
                 )
             elif ai_decision == "EXCEPTION":
@@ -129,13 +149,13 @@ class PolicyEngine:
                     requires_ai=requires_ai,
                 )
 
-        # ── 3. DETERMINISTIC ML POLICY (No AI invocation) ───────────────
+        # ── 4. DETERMINISTIC ML POLICY (No AI invocation) ───────────────
         if ml_prediction == "MATCHED":
-            if ml_confidence >= ML_AUTO_RESOLVE_CONFIDENCE and unexplained_amount <= 0.01:
+            if unexplained_amount <= 0.01:
                 return PolicyDecision(
                     final_status="AUTO_RESOLVE",
                     final_root_cause="MATCHED",
-                    policy_reason="Exact match verified with high confidence and zero unexplained variance.",
+                    policy_reason="Exact match verified with zero unexplained variance.",
                     requires_ai=requires_ai,
                 )
             else:
