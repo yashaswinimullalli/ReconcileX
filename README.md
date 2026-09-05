@@ -4,6 +4,11 @@
 
 Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-black?style=for-the-badge&logo=next.js&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
+
+🚀 **Live Demo:** [https://cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)
 
 ---
 
@@ -171,11 +176,11 @@ npm run dev
 
 ## Demo & Testing
 
-ReconcileX includes a pre-packaged **6-transaction mini dataset** ready for instantaneous testing:
+ReconcileX is live and accessible at **[cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)**. It includes a pre-packaged **6-transaction mini dataset** ready for instantaneous testing:
 
-1. Click **"Load Demo Data"** directly within the upload modal on the dashboard.
+1. Click **"Load Demo Data"** directly within the upload modal on the dashboard (or click **"Run Live Verification"**).
 2. The 3 required streams (*Store Orders*, *Payment Gateway Report*, *Bank Statement*) are automatically staged.
-3. Click **"Upload & Reconcile"** to witness sub-second multi-stage matching, XGBoost categorization, and automated resolution.
+3. Click **"Upload & Reconcile"** to witness sub-second multi-stage matching, XGBoost categorization, Gemini 2.0 Flash AI explanations, and automated resolution.
 
 ---
 
