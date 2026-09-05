@@ -2,7 +2,6 @@
 
 **AI-powered multi-source financial reconciliation.**
 
-Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
 [![Video Demo](https://img.shields.io/badge/Video%20Demo-Google%20Drive-4285F4?style=for-the-badge&logo=google-drive&logoColor=white)](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
