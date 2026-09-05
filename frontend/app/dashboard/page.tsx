@@ -28,8 +28,9 @@ export default function ControlCenterPage() {
   const [records, setRecords] = useState<ReconRecordListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  const loadData = async () => {
+  const loadData = async (autoSeed = true) => {
     try {
       setIsLoading(true);
       const list = await api.getBatches();
@@ -43,6 +44,21 @@ export default function ControlCenterPage() {
         // Fetch records for money flow totals and top issues (max backend limit is 200)
         const recordsRes = await api.getRecords(found.batch_id, { limit: 200 });
         setRecords(recordsRes.records || []);
+      } else if (autoSeed && !isSeeding) {
+        // No batches exist — auto-load the mini demo data so judges see results immediately
+        setIsSeeding(true);
+        try {
+          await api.runDemoBatch();
+          // Reload with autoSeed=false to prevent infinite loop
+          await loadData(false);
+        } catch (seedErr) {
+          console.warn('Auto-seed demo batch failed (backend may be offline):', seedErr);
+          setSelectedBatch(null);
+          setRecords([]);
+        } finally {
+          setIsSeeding(false);
+        }
+        return; // loadData(false) already set loading state
       } else {
         setSelectedBatch(null);
         setRecords([]);
