@@ -5,10 +5,12 @@
 Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
+[![Video Demo](https://img.shields.io/badge/Video%20Demo-Google%20Drive-4285F4?style=for-the-badge&logo=google-drive&logoColor=white)](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-black?style=for-the-badge&logo=next.js&logoColor=white)](https://cooperative-energy-production-a71c.up.railway.app)
 
-🚀 **Live Demo:** [https://cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)
+🚀 **Live Demo:** [https://cooperative-energy-production-a71c.up.railway.app](https://cooperative-energy-production-a71c.up.railway.app)  
+📹 **Video Demo Walkthrough:** [Watch on Google Drive](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)
 
 ---
 
@@ -181,6 +183,21 @@ ReconcileX is live and accessible at **[cooperative-energy-production-a71c.up.ra
 1. Click **"Load Demo Data"** directly within the upload modal on the dashboard (or click **"Run Live Verification"**).
 2. The 3 required streams (*Store Orders*, *Payment Gateway Report*, *Bank Statement*) are automatically staged.
 3. Click **"Upload & Reconcile"** to witness sub-second multi-stage matching, XGBoost categorization, Gemini 2.0 Flash AI explanations, and automated resolution.
+
+---
+
+## 📹 Video Demo
+
+A complete end-to-end video walkthrough of ReconcileX in action is available here:
+
+🎥 **[Watch the ReconcileX Video Demo on Google Drive](https://drive.google.com/file/d/16wpOgB2Hh7CqAC8n7T5VYf0NKFmpy3zF/view?usp=drive_link)**
+
+**What the video covers:**
+- **Zero-State Dashboard:** Clean initialization ready for live uploads or instant verification.
+- **Multi-Source Ingestion & Matching:** Reconciling Store Orders, Payment Gateway, and Bank Statements.
+- **XGBoost Anomaly Classification:** Sub-second root cause classification across L1 and L2 transactions.
+- **Gemini 2.0 Flash AI Explanations:** Audit-ready merchant explanations, evidence points, and recommended actions.
+- **Merchant Detail Views:** Transparent evidence verification and status breakdowns.
 
 ---
 
