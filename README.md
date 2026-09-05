@@ -1,91 +1,162 @@
-# ReconcileX — AI Finance Controller
+# ReconcileX
 
+**AI-powered multi-source financial reconciliation.**
 
+Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller
 
 <div align="center">
   <img width="700" alt="ReconcileX Banner" src="https://github.com/user-attachments/assets/2d19f864-c5f8-441f-81a8-aaef68293051" />
 </div>
 
-<img width="1198" height="1313" alt="image" src="https://github.com/user-attachments/assets/c30c8e79-dc27-4ce5-bcfb-2e710d246b16" />
+---
+
+## What It Does
+
+ReconcileX matches financial records across three sources — **store orders**, **payment gateway reports**, and **bank statements** — to find discrepancies, missing payments, and fee overcharges.
+
+**Pipeline:**
+```
+Store Orders → Payment Gateway → Bank Deposits
+     ↕               ↕               ↕
+  Deterministic Rules → XGBoost ML → Gemini AI → Policy Engine
+```
 
 ---
 
-## Key Highlights
+## Key Numbers
 
-- **Dataset**: Evaluated on the official **ReconRiver mixed-exceptions benchmark** (1,244 records across 3 financial sources).
-- **Architecture**: Strict four-tier separation:
-  - **Deterministic Rules**: Exact matching, discrepancy waterfall, and policy constraints.
-  - **Tabular ML (XGBoost)**: Fast classification across 15 real classes; 100% held-out test accuracy.
-  - **AI Investigator (Gemini 2.0 Flash)**: Invoked selectively (~2.5% of records) only for ambiguous cases; 0 tokens wasted on clean matches.
-  - **Policy Engine**: Zero-force resolution guarantee — *"Resolve what the evidence supports. Escalate what it does not."*
-- **Throughput**: 1,244 records reconciled in **510 ms** (~2,439 records/sec).
-- **Match Rate**: 84.89% auto-resolved cleanly; 157 exceptions and 31 reviews safely escalated.
-- **Frontend**: Full-featured Next.js 16 operations console with live KPI metrics, interactive charts, exception triage queue, deep investigation waterfall, and one-click CSV/JSON export.
+| Metric | Value |
+|--------|-------|
+| Benchmark dataset | 1,244 records, 3 sources |
+| Processing time | ~510 ms |
+| Throughput | ~2,439 records/sec |
+| ML test accuracy | 100% (held-out set) |
+| Auto-resolve rate | 84.89% |
+| AI invocation rate | ~2.5% (only ambiguous cases) |
 
 ---
 
-## Getting Started
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16, React, TypeScript, Tailwind CSS |
+| Backend | FastAPI, Python, SQLite |
+| ML | XGBoost (15-class L1 + 6-class L2) |
+| AI | Gemini 2.0 Flash (selective investigation) |
+| Fonts | Instrument Serif, Inter |
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+ and npm
 
-### 1. Backend Setup
+- Python 3.10+
+- Node.js 18+
+- Gemini API key ([Get one here](https://aistudio.google.com/apikey))
+
+### 1. Backend
+
 ```bash
 cd backend
 pip install -r requirements.txt
 
-# Run ML model training (offline script already generated models)
+# Configure environment
+cp .env.example .env
+# Add your GEMINI_API_KEY to .env
+
+# Train ML models (pre-trained models included)
 python -m ml.train
 
-# Start FastAPI server
+# Start server
 python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
-Backend API will be live at `http://127.0.0.1:8000`  
-Interactive Swagger Docs: `http://127.0.0.1:8000/docs`
 
-### 2. Frontend Setup
+API: `http://127.0.0.1:8000` · Docs: `http://127.0.0.1:8000/docs`
+
+### 2. Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend will be live at `http://localhost:3000`
+
+App: `http://localhost:3000`
 
 ---
 
-## Retailer-First Design: Plain English Translation
+## Project Structure
 
-Traditional reconciliation tools are built with dense accounting jargon for CPAs. ReconcileX includes an instant **Retailer View vs. CPA Pro View** toggle designed for store owners, D2C brands, and non-finance shopkeepers:
-
-| Before (CPA / Accountant Jargon) | Now (Retailer Plain English) | What the Store Owner Understands |
-| :--- | :--- | :--- |
-| **Control Center** | 🏠 **Store Cash Overview**<br>*(“Where is my money?”)* | The home dashboard answering if all sales are safe and confirmed in the bank. |
-| **Reconciliation** | 📋 **Orders & Bank Payouts**<br>*(“Verify customer bills”)* | Master list matching what customers paid in store vs. what landed in the bank. |
-| **Exceptions Queue** | 🚨 **Missing Money & Claims**<br>*(“Overcharged fees & gaps”)* | Action queue for orders where gateway overcharged fees or funds are stuck. |
-| **Evaluation & ML** | ⚡ **AI Safety & Accuracy**<br>*(“100% test accuracy”)* | Transparent proof that the AI doesn't hallucinate or force-balance numbers. |
-| **Audit & Export** | 📁 **Download Reports**<br>*(“CSVs & Tax records”)* | 1-click download of verified transaction CSVs to hand to an accountant. |
-| **Internal Ledger** | 🛒 **Your Store Orders / Sales** | Products and orders billed in your checkout system or cash register. |
-| **Processor Transactions** | 💳 **Payment App Records (Razorpay/Stripe)** | What the payment gateway captured and deducted in fees. |
-| **Bank Settlements** | 🏦 **Cash in Your Bank Account** | The actual physical funds credited to your business bank account. |
-| **Fee Variance** | ⚠️ **Gateway Overcharged Fee** | Gateway charged more commission than your agreed pricing formula. |
-| **Settlement Delay In-Flight** | ⏳ **Money on the Way (Bank Delay)** | Normal 1–2 day bank clearing window; money is safe and not missing. |
-| **Missing in Processor** | 👻 **Ghost Order** | Customer billed in store, but payment app has no record of payment. |
-| **Auto-Resolved** | 🟢 **Auto-Verified & Safe** | Mathematics and evidence match 100%; safe to close. |
-| **Escalated / Exception** | 🔴 **Claim Money Back** | Generates pre-filled 1-click dispute email for payment gateway support. |
+```
+ReconcileX/
+├── backend/
+│   ├── api/            # FastAPI route handlers
+│   ├── data/           # Benchmark + mini test datasets
+│   ├── ml/             # XGBoost training & inference
+│   ├── models/         # Database & Pydantic schemas
+│   ├── services/       # Reconciliation pipeline, matching, AI
+│   ├── main.py         # App entrypoint
+│   └── config.py       # Environment & settings
+├── frontend/
+│   ├── app/            # Next.js pages & routing
+│   ├── components/     # UI components
+│   └── lib/            # API client, types, utilities
+└── README.md
+```
 
 ---
 
-## System Screens
+## Architecture
 
-1. **Store Cash Overview (`/`)**: Real-time sales telemetry, "Where is My Money?" summary cards, and one-click benchmark batch runner.
-2. **Orders & Bank Payouts (`/reconciliation`)**: Filterable table separating Store Orders (Store ↔ Gateway) and Bank Deposits (Gateway ↔ Bank).
-3. **Missing Money & Claims (`/exceptions`)**: Store owner triage workspace for overcharged fees and delayed transfers.
-4. **Exception Deep Dive (`/exceptions/[id]`)**: 3-source ledger trail, plain English money story, and 1-click Razorpay dispute email generator.
-5. **AI Safety & Accuracy (`/evaluation`)**: Held-out test metrics, confusion matrix, and feature importance rankings.
-6. **Download Reports (`/audit`)**: Downloadable reconciliation CSVs, exception reports, and JSON audit archives.
+```
+┌─────────────────────────────────────────────────────┐
+│                    RECONCILIATION PIPELINE           │
+├─────────────┬─────────────┬─────────────┬───────────┤
+│  Layer 1    │  Layer 2    │  Layer 3    │  Layer 4  │
+│  Rules      │  XGBoost    │  Gemini AI  │  Policy   │
+│             │             │             │  Engine   │
+│  Exact      │  15-class   │  Selective  │  Zero-    │
+│  matching   │  classifi-  │  investi-   │  force    │
+│  & waterfall│  cation     │  gation     │  resolve  │
+└─────────────┴─────────────┴─────────────┴───────────┘
+```
+
+**Design principle:** *Resolve what the evidence supports. Escalate what it does not.*
+
+- **Rules** handle exact matches and deterministic discrepancies
+- **XGBoost** classifies remaining records across 15 exception types
+- **Gemini AI** investigates only ambiguous cases (~2.5% of records)
+- **Policy Engine** enforces zero-force resolution — never fabricates a match
+
+---
+
+## Screens
+
+| Route | Page | Purpose |
+|-------|------|---------|
+| `/` | Intro | Cinematic entrance |
+| `/dashboard` | Cash Overview | Sales telemetry and money flow summary |
+| `/reconciliation` | Orders & Payouts | Order-level and settlement-level matching |
+| `/exceptions` | Money Issues | Exception triage and investigation |
+| `/exceptions/[id]` | Deep Dive | 3-source ledger trail with AI explanation |
+| `/audit` | Reports | CSV/JSON export for accountants |
+
+---
+
+## Demo Data
+
+The app includes a built-in **6-order mini dataset** that loads automatically on first visit. You can also upload your own CSVs through the dashboard.
+
+**Required CSV formats:**
+
+1. **Store Sales** — `merchant_order_id, gross_amount, occurred_at`
+2. **Payment Report** — `merchant_order_id, processor_transaction_id, gross_amount, fee_amount, settlement_batch_id, processor_event_time`
+3. **Bank Statement** — `settlement_batch_id, credited_amount, booked_at`
 
 ---
 
 ## License
-MIT License
+
+MIT
