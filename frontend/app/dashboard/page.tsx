@@ -15,6 +15,7 @@ import {
   Play,
   FileCheck2,
   CheckCircle2,
+  RefreshCw,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { CSVUploader } from '@/components/upload/CSVUploader';
@@ -26,45 +27,37 @@ export default function ControlCenterPage() {
   const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<BatchSummary | null>(null);
   const [records, setRecords] = useState<ReconRecordListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
+  const [isRunningCardDemo, setIsRunningCardDemo] = useState(false);
 
-  const loadData = async (autoSeed = true) => {
+  const loadData = async (targetBatchId?: string) => {
     try {
       setIsLoading(true);
       const list = await api.getBatches();
       setBatches(list);
-      if (list.length > 0) {
-        const currentId = selectedBatch?.batch_id;
-        const found = list.find((b) => b.batch_id === currentId) || list[0];
-        const summary = await api.getBatchSummary(found.batch_id);
-        setSelectedBatch(summary);
 
-        // Fetch records for money flow totals and top issues (max backend limit is 200)
-        const recordsRes = await api.getRecords(found.batch_id, { limit: 200 });
-        setRecords(recordsRes.records || []);
-      } else if (autoSeed && !isSeeding) {
-        // No batches exist — auto-load the mini demo data so judges see results immediately
-        setIsSeeding(true);
-        try {
-          await api.runDemoBatch();
-          // Reload with autoSeed=false to prevent infinite loop
-          await loadData(false);
-        } catch (seedErr) {
-          console.warn('Auto-seed demo batch failed (backend may be offline):', seedErr);
-          setSelectedBatch(null);
-          setRecords([]);
-        } finally {
-          setIsSeeding(false);
+      // Only load a batch if a targetBatchId is explicitly specified
+      const batchToLoad = targetBatchId || selectedBatch?.batch_id;
+      if (batchToLoad) {
+        const found = list.find((b) => b.batch_id === batchToLoad);
+        if (found) {
+          const summary = await api.getBatchSummary(found.batch_id);
+          setSelectedBatch(summary);
+
+          const recordsRes = await api.getRecords(found.batch_id, { limit: 200 });
+          setRecords(recordsRes.records || []);
+          return;
         }
-        return; // loadData(false) already set loading state
-      } else {
-        setSelectedBatch(null);
-        setRecords([]);
       }
+
+      // Default initial state: start on the clean 'Ready to Verify' screen
+      setSelectedBatch(null);
+      setRecords([]);
     } catch (err) {
       console.error('Failed to load reconciliation data:', err);
+      setSelectedBatch(null);
+      setRecords([]);
     } finally {
       setIsLoading(false);
     }
@@ -76,12 +69,15 @@ export default function ControlCenterPage() {
 
   const handleBatchSelected = async (batchId: string) => {
     try {
+      setIsLoading(true);
       const summary = await api.getBatchSummary(batchId);
       setSelectedBatch(summary);
       const recordsRes = await api.getRecords(batchId, { limit: 200 });
       setRecords(recordsRes.records || []);
     } catch (err) {
       console.error('Failed to switch batch:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,7 +108,7 @@ export default function ControlCenterPage() {
       <Header
         currentBatchId={selectedBatch?.batch_id}
         onBatchChange={handleBatchSelected}
-        onRefresh={loadData}
+        onRefresh={() => loadData(selectedBatch?.batch_id)}
         onOpenUpload={() => setIsUploadOpen(true)}
         onClear={() => {
           setBatches([]);
@@ -124,9 +120,9 @@ export default function ControlCenterPage() {
       <CSVUploader
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onSuccess={(id) => {
-          loadData();
-          handleBatchSelected(id);
+        onSuccess={async (id) => {
+          await loadData(id);
+          await handleBatchSelected(id);
         }}
       />
 
@@ -546,20 +542,33 @@ export default function ControlCenterPage() {
               <button
                 onClick={async () => {
                   try {
+                    setIsRunningCardDemo(true);
                     const res = await api.runDemoBatch();
                     if (res.batch_id) {
-                      await loadData();
+                      await loadData(res.batch_id);
                       await handleBatchSelected(res.batch_id);
                     }
                   } catch (e: unknown) {
                     const msg = e instanceof Error ? e.message : String(e);
                     alert(`Run failed: ${msg}`);
+                  } finally {
+                    setIsRunningCardDemo(false);
                   }
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+                disabled={isRunningCardDemo}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors disabled:opacity-50"
               >
-                <Play className="w-4 h-4 fill-current text-slate-600" />
-                <span>Run Reconciliation</span>
+                {isRunningCardDemo ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin text-slate-600" />
+                    <span>Reconciling...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 fill-current text-slate-600" />
+                    <span>Run Reconciliation</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
