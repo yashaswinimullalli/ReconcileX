@@ -42,27 +42,79 @@ class MLClassifier:
         self._load_artifacts()
 
     def _load_artifacts(self):
-        """Load joblib bundles and fee policy if available."""
+        """Load XGBoost models (native JSON preferred to avoid unpickle warnings) and fee policy."""
+        # 1. Load L1 model
+        l1_json = self.ml_dir / "l1_model.json"
+        l1_meta = self.ml_dir / "l1_meta.json"
         l1_path = self.ml_dir / "l1_model.joblib"
+
+        if l1_json.exists() and l1_meta.exists():
+            try:
+                from xgboost import XGBClassifier
+                model = XGBClassifier()
+                model.load_model(str(l1_json))
+                with open(l1_meta, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                self.l1_bundle = {
+                    "model": model,
+                    "classes": meta["classes"],
+                    "feature_columns": meta.get("feature_columns", []),
+                }
+                logger.info(f"Loaded L1 model from native JSON with classes: {self.l1_bundle['classes']}")
+            except Exception as e:
+                logger.warning(f"Failed to load L1 from JSON: {e}")
+
+        if self.l1_bundle is None and l1_path.exists():
+            try:
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self.l1_bundle = joblib.load(l1_path)
+                logger.info(f"Loaded L1 model from joblib with classes: {self.l1_bundle['classes']}")
+            except Exception as e:
+                logger.warning(f"Failed to load L1 from joblib: {e}")
+        elif self.l1_bundle is None:
+            logger.warning(f"L1 model not found at {l1_json} or {l1_path}")
+
+        # 2. Load L2 model
+        l2_json = self.ml_dir / "l2_model.json"
+        l2_meta = self.ml_dir / "l2_meta.json"
         l2_path = self.ml_dir / "l2_model.joblib"
+
+        if l2_json.exists() and l2_meta.exists():
+            try:
+                from xgboost import XGBClassifier
+                model = XGBClassifier()
+                model.load_model(str(l2_json))
+                with open(l2_meta, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                self.l2_bundle = {
+                    "model": model,
+                    "classes": meta["classes"],
+                    "feature_columns": meta.get("feature_columns", []),
+                }
+                logger.info(f"Loaded L2 model from native JSON with classes: {self.l2_bundle['classes']}")
+            except Exception as e:
+                logger.warning(f"Failed to load L2 from JSON: {e}")
+
+        if self.l2_bundle is None and l2_path.exists():
+            try:
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self.l2_bundle = joblib.load(l2_path)
+                logger.info(f"Loaded L2 model from joblib with classes: {self.l2_bundle['classes']}")
+            except Exception as e:
+                logger.warning(f"Failed to load L2 from joblib: {e}")
+        elif self.l2_bundle is None:
+            logger.warning(f"L2 model not found at {l2_json} or {l2_path}")
+
         fee_path = self.ml_dir / "fee_policy.json"
         metrics_path = self.ml_dir / "metrics.json"
 
-        if l1_path.exists():
-            self.l1_bundle = joblib.load(l1_path)
-            logger.info(f"Loaded L1 model with classes: {self.l1_bundle['classes']}")
-        else:
-            logger.warning(f"L1 model not found at {l1_path}")
-
-        if l2_path.exists():
-            self.l2_bundle = joblib.load(l2_path)
-            logger.info(f"Loaded L2 model with classes: {self.l2_bundle['classes']}")
-        else:
-            logger.warning(f"L2 model not found at {l2_path}")
-
         if fee_path.exists():
             try:
-                with open(fee_path, "r") as f:
+                with open(fee_path, "r", encoding="utf-8") as f:
                     self.fee_policy = json.load(f)
                 logger.info(f"Loaded fee policy: {self.fee_policy}")
             except Exception as e:
@@ -70,7 +122,7 @@ class MLClassifier:
 
         if metrics_path.exists():
             try:
-                with open(metrics_path, "r") as f:
+                with open(metrics_path, "r", encoding="utf-8") as f:
                     self.metrics = json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load metrics: {e}")

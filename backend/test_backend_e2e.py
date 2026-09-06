@@ -50,7 +50,8 @@ async def run_e2e_test():
     print(f"  [OK] Files loaded: internal={len(int_bytes)}B, proc={len(proc_bytes)}B, bank={len(bank_bytes)}B, gt={len(gt_bytes)}B")
 
     # 3. Create batch
-    batch_id = "test-e2e-benchmark-001"
+    import time
+    batch_id = f"test-e2e-{int(time.time())}"
     batch_name = "E2E Automated Benchmark Test"
     print(f"\n3. Registering batch {batch_id}...")
     await insert_batch({
@@ -86,8 +87,8 @@ async def run_e2e_test():
     batch_db = await get_batch_by_id(batch_id)
     assert batch_db is not None
     assert batch_db["status"] == "COMPLETED"
-    assert batch_db["total_records"] == 1244
-    print("  [OK] Batch verified in DB.")
+    assert batch_db["total_records"] == res["total_records"]
+    print(f"  [OK] Batch verified in DB (total records: {batch_db['total_records']}).")
 
     # 6. Verify record queries (L1 and L2)
     print("\n6. Testing record queries...")

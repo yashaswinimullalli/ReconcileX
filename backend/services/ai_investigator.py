@@ -104,8 +104,6 @@ class AIInvestigator:
             # Validate required fields from Gemini structured JSON
             issue_type = str(parsed.get("issue_type") or parsed.get("root_cause") or ml_prediction)
             summary = str(parsed.get("summary") or parsed.get("plain_english_explanation") or f"Discrepancy identified: {issue_type}")
-            if not summary.startswith("Gemini 2.0 Flash Analysis:"):
-                summary = f"Gemini 2.0 Flash Analysis: {summary}"
             confidence = float(parsed.get("confidence", 0.70))
             confidence = max(0.0, min(1.0, confidence))
             
@@ -135,13 +133,18 @@ class AIInvestigator:
 
         except Exception as e:
             logger.warning(f"AI investigation failed for {work_key}: {e}. Returning safe fallback.")
-            return self._create_fallback(
-                reason="AI call timed out or returned invalid response",
-                ml_prediction=ml_prediction,
-                recon_level=recon_level,
-                work_key=work_key,
-                record_context=record_context,
-                discrepancy_info=discrepancy_info,
+            return AIInvestigationResult(
+                decision="NEEDS_REVIEW",
+                root_cause=ml_prediction,
+                confidence=0.0,
+                evidence=[
+                    "AI investigation unavailable. This case has been safely sent for human review.",
+                    "Deterministic reconciliation evidence and records preserved.",
+                ],
+                recommended_action="Conduct manual inspection of ledger records and bank credit entries.",
+                plain_english_explanation="AI investigation unavailable. This case has been safely sent for human review.",
+                raw_response={"fallback_reason": str(e)},
+                fallback_used=True,
             )
 
     def _build_prompt(
@@ -284,7 +287,7 @@ SAFETY CONSTRAINTS:
             recommended_action=action,
             plain_english_explanation=explanation,
             raw_response={"source": "gemini-2.0-flash", "reason": reason},
-            fallback_used=False,
+            fallback_used=True,
         )
 
 

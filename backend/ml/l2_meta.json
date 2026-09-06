@@ -1,0 +1,21 @@
+{
+  "classes": [
+    "AMOUNT_MISMATCH",
+    "CURRENCY_MISMATCH",
+    "DUPLICATE_BANK_ENTRY",
+    "LATE_SETTLEMENT",
+    "MATCHED",
+    "MISSING_BANK_SETTLEMENT"
+  ],
+  "feature_columns": [
+    "has_bank_entry",
+    "has_processor_batch",
+    "expected_net_total",
+    "credited_amount_val",
+    "settlement_diff",
+    "settlement_diff_pct",
+    "settlement_delay_days",
+    "currency_match",
+    "is_duplicate_bank"
+  ]
+}

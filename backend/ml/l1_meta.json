@@ -1,0 +1,33 @@
+{
+  "classes": [
+    "AMBIGUOUS_MATCH",
+    "AMOUNT_MISMATCH",
+    "CURRENCY_MISMATCH",
+    "DUPLICATE_INTERNAL",
+    "DUPLICATE_PROCESSOR",
+    "FEE_MISMATCH",
+    "MATCHED",
+    "MISSING_INTERNAL",
+    "MISSING_PROCESSOR",
+    "PARTIAL_REFUND",
+    "REFUND_MATCHED"
+  ],
+  "feature_columns": [
+    "has_internal",
+    "has_processor",
+    "gross_amount_valid",
+    "gross_diff",
+    "gross_diff_pct",
+    "fee_amount",
+    "fee_pct",
+    "fee_diff",
+    "time_diff_seconds",
+    "currency_match",
+    "has_refund",
+    "refund_ratio",
+    "is_duplicate_internal",
+    "is_duplicate_processor",
+    "candidate_count",
+    "payment_status_encoded"
+  ]
+}

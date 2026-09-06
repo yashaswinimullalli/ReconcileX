@@ -280,17 +280,25 @@ def train_model(
         logger.info(f"  {name}: {imp:.4f}")
 
     # Save model + metadata
+    # 1. Native XGBoost JSON (portable, version-stable, zero unpickling warnings)
+    json_path = ML_DIR / f"{model_name}_model.json"
+    model.save_model(str(json_path))
+
+    meta_path = ML_DIR / f"{model_name}_meta.json"
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump({"classes": classes, "feature_columns": feature_names}, f, indent=2)
+
+    # 2. Clean joblib bundle (omit LabelEncoder to prevent sklearn cross-version warnings)
     model_path = ML_DIR / f"{model_name}_model.joblib"
     joblib.dump(
         {
             "model": model,
-            "label_encoder": le,
             "feature_columns": feature_names,
             "classes": classes,
         },
         model_path,
     )
-    logger.info(f"\nModel saved to: {model_path}")
+    logger.info(f"\nModel saved to: {json_path} and {model_path}")
 
     # Build metrics dict
     metrics = {
