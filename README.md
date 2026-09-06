@@ -4,7 +4,7 @@
 
 
 🚀 **Live Demo:** [demo](https://reconcile-production-f3bb.up.railway.app)  
-📹 **Video Demo Walkthrough:** [demo vedio](https://drive.google.com/file/d/1M0mHIm0XfRHXq9AgD6gQpQ_likno67Nd/view?usp=sharing)
+📹 **Video Demo Walkthrough:** [demo video](https://drive.google.com/file/d/1M0mHIm0XfRHXq9AgD6gQpQ_likno67Nd/view?usp=sharing)
 
 ---
 
